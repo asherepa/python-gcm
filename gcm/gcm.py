@@ -1,5 +1,5 @@
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import json
 from collections import defaultdict
 import time
@@ -27,9 +27,9 @@ class GCMUnavailableException(GCMException): pass
 # TODO: Refactor this to be more human-readable
 def group_response(response, registration_ids, key):
     # Pair up results and reg_ids
-    mapping = zip(registration_ids, response['results'])
+    mapping = list(zip(registration_ids, response['results']))
     # Filter by key
-    filtered = filter(lambda x: key in x[1], mapping)
+    filtered = [x for x in mapping if key in x[1]]
     # Only consider the value in the dict
     tupled = [(s[0], s[1][key]) for s in filtered]
     # Grouping of errors and mapping of ids
@@ -54,12 +54,12 @@ def urlencode_utf8(params):
     """
 
     if hasattr(params, 'items'):
-        params = params.items()
+        params = list(params.items())
 
     params =  (
         '='.join((
-            urllib.quote_plus(k.encode('utf8'), safe='/'),
-            urllib.quote_plus(v.encode('utf8'), safe='/')
+            urllib.parse.quote_plus(k.encode('utf8'), safe='/'),
+            urllib.parse.quote_plus(v.encode('utf8'), safe='/')
         )) for k, v in params
     )
 
@@ -80,13 +80,13 @@ class GCM(object):
         self.api_key = api_key
         self.url = url
         if proxy:
-            if isinstance(proxy,basestring):
+            if isinstance(proxy,str):
                 protocol = url.split(':')[0]
                 proxy={protocol:proxy}
 
-            auth = urllib2.HTTPBasicAuthHandler()
-            opener = urllib2.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
-            urllib2.install_opener(opener)
+            auth = urllib.request.HTTPBasicAuthHandler()
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler(proxy), auth, urllib.request.HTTPHandler)
+            urllib.request.install_opener(opener)
 
 
     def construct_payload(self, registration_ids, data=None, collapse_key=None,
@@ -112,15 +112,16 @@ class GCM(object):
             payload = {'registration_id': registration_ids}
             if data:
                 plaintext_data = data.copy()
-                for k in plaintext_data.keys():
+                for k in list(plaintext_data.keys()):
                     plaintext_data['data.%s' % k] = plaintext_data.pop(k)
                 payload.update(plaintext_data)
 
         if delay_while_idle:
             payload['delay_while_idle'] = delay_while_idle
 
-        if time_to_live >= 0:
-            payload['time_to_live'] = time_to_live
+        if time_to_live is not None:
+            if time_to_live >= 0:
+                payload['time_to_live'] = time_to_live
 
         if collapse_key:
             payload['collapse_key'] = collapse_key
@@ -152,11 +153,11 @@ class GCM(object):
 
         if not is_json:
             data = urlencode_utf8(data)
-        req = urllib2.Request(self.url, data, headers)
+        req = urllib.request.Request(self.url, data, headers)
 
         try:
-            response = urllib2.urlopen(req).read()
-        except urllib2.HTTPError as e:
+            response = urllib.request.urlopen(req).read()
+        except urllib.error.HTTPError as e:
             if e.code == 400:
                 raise GCMMalformedJsonException("The request could not be parsed as JSON")
             elif e.code == 401:
@@ -166,7 +167,7 @@ class GCM(object):
             else:
                 error = "GCM service error: %d" % e.code
                 raise GCMUnavailableException(error)
-        except urllib2.URLError as e:
+        except urllib.error.URLError as e:
             raise GCMConnectionException("There was an internal error in the GCM server while trying to process the request")
 
         if is_json:

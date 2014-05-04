@@ -1,7 +1,7 @@
 import unittest
 from gcm import *
 import json
-from mock import MagicMock, patch
+from unittest.mock import MagicMock, patch
 import time
 
 
@@ -97,7 +97,7 @@ class GCMTest(unittest.TestCase):
         self.assertIn('data.param2', result)
 
     def test_limit_reg_ids(self):
-        reg_ids = range(1003)
+        reg_ids = list(range(1003))
         self.assertTrue(len(reg_ids) > 1000)
         with self.assertRaises(GCMTooManyRegIdsException):
             self.gcm.json_request(registration_ids=reg_ids, data=self.data)
@@ -180,7 +180,7 @@ class GCMTest(unittest.TestCase):
         res = self.gcm.handle_plaintext_response(response)
         self.assertEqual(res, '3456')
 
-    @patch('urllib2.urlopen')
+    @patch('urllib.request.urlopen')
     def test_make_request_plaintext(self, urlopen_mock):
         """ Test plaintext make_request. """
 
@@ -207,13 +207,13 @@ class GCMTest(unittest.TestCase):
         )
 
 
-    @patch('urllib2.urlopen')
+    @patch('urllib.request.urlopen')
     def test_make_request_unicode(self, urlopen_mock):
         """ Regression: Test make_request with unicode payload. """
 
         # Unicode character in data
         data = {
-            'message': u'\x80abc'
+            'message': '\x80abc'
         }
 
         self.gcm.make_request(data, is_json=False)
