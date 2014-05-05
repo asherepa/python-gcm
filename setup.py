@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='python-gcm',
     version='0.1.4',
-    packages=['gcm'],
+    py_modules = ['gcm'],
     license=open('LICENSE').read(),
     author='Minh Nam Ngo',
     author_email='nam@namis.me',
