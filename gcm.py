@@ -275,7 +275,7 @@ class GCM(object):
                 registration_ids, data, collapse_key,
                 delay_while_idle, time_to_live, True, dry_run
             )
-            response = self.make_request(payload, is_json=True)
+            response = self.make_request(payload.encode('utf-8'), is_json=True)
             info = self.handle_json_response(response, registration_ids)
 
             unsent_reg_ids = self.extract_unsent_reg_ids(info)
