@@ -171,7 +171,7 @@ class GCM(object):
             raise GCMConnectionException("There was an internal error in the GCM server while trying to process the request")
 
         if is_json:
-            response = json.loads(response)
+            response = json.loads(response.decode('utf-8'))
         return response
 
     def raise_error(self, error):
