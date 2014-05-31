@@ -29,7 +29,7 @@ def group_response(response, registration_ids, key):
     # Pair up results and reg_ids
     mapping = zip(registration_ids, response['results'])
     # Filter by key
-    filtered = filter(lambda x: key in x[1], mapping)
+    filtered = [x for x in mapping if key in x[1]]
     # Only consider the value in the dict
     tupled = [(s[0], s[1][key]) for s in filtered]
     # Grouping of errors and mapping of ids
