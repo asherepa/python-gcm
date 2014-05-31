@@ -56,7 +56,7 @@ def urlencode_utf8(params):
     if hasattr(params, 'items'):
         params = params.items()
 
-    params =  (
+    params = (
         '='.join((
             urllib.quote_plus(k.encode('utf8'), safe='/'),
             urllib.quote_plus(v.encode('utf8'), safe='/')
@@ -69,8 +69,8 @@ def urlencode_utf8(params):
 class GCM(object):
 
     # Timeunit is milliseconds.
-    BACKOFF_INITIAL_DELAY = 1000;
-    MAX_BACKOFF_DELAY = 1024000;
+    BACKOFF_INITIAL_DELAY = 1000
+    MAX_BACKOFF_DELAY = 1024000
 
     def __init__(self, api_key, url=GCM_URL, proxy=None):
         """ api_key : google api key
@@ -80,17 +80,16 @@ class GCM(object):
         self.api_key = api_key
         self.url = url
         if proxy:
-            if isinstance(proxy,basestring):
+            if isinstance(proxy, basestring):
                 protocol = url.split(':')[0]
-                proxy={protocol:proxy}
+                proxy = {protocol: proxy}
 
             auth = urllib2.HTTPBasicAuthHandler()
             opener = urllib2.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
             urllib2.install_opener(opener)
 
-
     def construct_payload(self, registration_ids, data=None, collapse_key=None,
-                            delay_while_idle=False, time_to_live=None, is_json=True, dry_run=False):
+                          delay_while_idle=False, time_to_live=None, is_json=True, dry_run=False):
         """
         Construct the dictionary mapping of parameters.
         Encodes the dictionary into JSON if for json requests.
@@ -218,7 +217,7 @@ class GCM(object):
         return []
 
     def plaintext_request(self, registration_id, data=None, collapse_key=None,
-                            delay_while_idle=False, time_to_live=None, retries=5, dry_run=False):
+                          delay_while_idle=False, time_to_live=None, retries=5, dry_run=False):
         """
         Makes a plaintext request to GCM servers
 
@@ -251,7 +250,7 @@ class GCM(object):
         raise IOError("Could not make request after %d attempts" % attempt)
 
     def json_request(self, registration_ids, data=None, collapse_key=None,
-                        delay_while_idle=False, time_to_live=None, retries=5, dry_run=False):
+                     delay_while_idle=False, time_to_live=None, retries=5, dry_run=False):
         """
         Makes a JSON request to GCM servers
 
