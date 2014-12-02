@@ -1,5 +1,4 @@
 import urllib
-import urllib2
 import json
 from collections import defaultdict
 import time
@@ -84,9 +83,9 @@ class GCM(object):
                 protocol = url.split(':')[0]
                 proxy = {protocol: proxy}
 
-            auth = urllib2.HTTPBasicAuthHandler()
-            opener = urllib2.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
-            urllib2.install_opener(opener)
+            auth = urllib.HTTPBasicAuthHandler()
+            opener = urllib.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
+            urllib.install_opener(opener)
 
     def construct_payload(self, registration_ids, data=None, collapse_key=None,
                           delay_while_idle=False, time_to_live=None, is_json=True, dry_run=False):
