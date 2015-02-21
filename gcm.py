@@ -1,4 +1,7 @@
 import urllib
+import urllib.request
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
 import json
 from collections import defaultdict
 import time
@@ -57,8 +60,8 @@ def urlencode_utf8(params):
 
     params = (
         '='.join((
-            urllib.quote_plus(k.encode('utf8'), safe='/'),
-            urllib.quote_plus(v.encode('utf8'), safe='/')
+            quote_plus(k, safe='/'),
+            quote_plus(v, safe='/')
         )) for k, v in params
     )
 
@@ -84,7 +87,7 @@ class GCM(object):
                 proxy = {protocol: proxy}
 
             auth = urllib.HTTPBasicAuthHandler()
-            opener = urllib.build_opener(urllib2.ProxyHandler(proxy), auth, urllib2.HTTPHandler)
+            opener = urllib.build_opener(urllib.ProxyHandler(proxy), auth, urllib.HTTPHandler)
             urllib.install_opener(opener)
 
     def construct_payload(self, registration_ids, data=None, collapse_key=None,
@@ -149,12 +152,12 @@ class GCM(object):
             headers['Content-Type'] = 'application/json'
 
         if not is_json:
-            data = urlencode_utf8(data)
-        req = urllib2.Request(self.url, data, headers)
+            data = urlencode(data)
+        req = urllib.request.Request(self.url, data.encode('utf8'), headers)
 
         try:
-            response = urllib2.urlopen(req).read()
-        except urllib2.HTTPError as e:
+            response = urllib.request.urlopen(req).read()
+        except HTTPError as e:
             if e.code == 400:
                 raise GCMMalformedJsonException("The request could not be parsed as JSON")
             elif e.code == 401:
@@ -164,7 +167,7 @@ class GCM(object):
             else:
                 error = "GCM service error: %d" % e.code
                 raise GCMUnavailableException(error)
-        except urllib2.URLError as e:
+        except URLError as e:
             raise GCMConnectionException("There was an internal error in the GCM server while trying to process the request")
 
         if is_json:
@@ -188,7 +191,7 @@ class GCM(object):
     def handle_plaintext_response(self, response):
 
         # Split response by line
-        response_lines = response.strip().split('\n')
+        response_lines = response.decode('utf8').strip().split('\n')
         # Split the first line by =
         key, value = response_lines[0].split('=')
         if key == 'Error':
